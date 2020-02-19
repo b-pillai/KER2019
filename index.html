@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Griffith Ethereum test</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script language="javascript" type="text/javascript" src="./lib/web3.min.js"></script>
+
+    <script language="javascript" type="text/javascript" src="ContractABI.abi.js"></script>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>test</h1>
+
+        <h2 id="details"></h2>
+        <img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
+
+        <label for="name" class="col-lg-2 control-label">Name</label>
+        <input id="name" type="text">
+
+        <label for="name" class="col-lg-2 control-label">Type</label>
+        <input id="type" type="text">
+
+        <label for="name" class="col-lg-2 control-label">Year</label>
+        <input id="year" type="text">
+
+        <button id="button">Add Records</button>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            // set the provider you want from Web3.providers
+            web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/a9b3ae75c8e94cec878e1e8aa249cc24"));
+            // web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/a9b3ae75c8e94cec878e1e8aa249cc24"));
+            //  web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/a9b3ae75c8e94cec878e1e8aa249cc24"));
+            // web3 = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/a9b3ae75c8e94cec878e1e8aa249cc24"));
+        }
+
+        web3.eth.defaultAccount = web3.eth.accounts[0];
+
+        //  const contractAddress = "0x75196b414d59c3a9c1b28c759f5c6f011e2130cf";//contract address
+        var contractAddress = "0xe6857893a85ec9aee39eba8e9163f64c4c7942f0";//ropsten
+        var contractABI = web3.eth.contract(ContractABI);//contract ABI
+
+        var Contractinstance = contractABI.at(contractAddress);
+
+        var assetEvent = Contractinstance.assetAdded();
+
+        //event watcher
+        assetEvent.watch(function (error, result) {
+            if (!error) {
+                $("#loader").hide();
+                $("#details").html(result.args.name + ' - ' + result.args.vtype + ' - ' + result.args.year);
+            } else {
+                $("#loader").hide();
+                console.log(error);
+            }
+        });
+
+        //add button click event
+        $("#button").click(function () {
+            $("#loader").show();
+            // Coursetro.setInstructor(web3.eth.defaultAccount, $("#age").val(), $("#fName").val(), $("#lName").val(), (err, res) => {
+            Contractinstance.addVehicle(web3.eth.defaultAccount, $("#name").val(), $("#type").val(), $("#year").val(), (err, res) => {
+                // AssetContract.addAsset($("#name").val(), $("#type").val(), $("#year").val(), (err, res) => {
+                if (err) {
+                    $("#loader").hide();
+                }
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>
